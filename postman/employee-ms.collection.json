@@ -1,0 +1,439 @@
+{
+  "info": {
+    "_postman_id": "f1e2d3c4-b5a6-7890-abcd-123456789abc",
+    "name": "Employee Microservice",
+    "description": "REST API collection for Employee Microservice following hexagonal architecture.\n\n**Base URL:** `{{base_url}}`\n\n**Available endpoints:**\n- GET /employees\n- GET /employees/{id}\n- POST /employees\n- PUT /employees/{id}\n- DELETE /employees/{id}\n- GET /employees/search?name={name}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Employees",
+      "description": "CRUD operations for employee management",
+      "item": [
+        {
+          "name": "GET all employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{employees_path}}",
+              "host": ["{{base_url}}{{employees_path}}"]
+            },
+            "description": "Returns the full list of registered employees."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET employee by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{employees_path}}/{{employee_id}}",
+              "host": ["{{base_url}}{{employees_path}}/{{employee_id}}"]
+            },
+            "description": "Returns the detail of a single employee by their UUID.\n\n> **Note:** `employee_id` is auto-filled after running POST /employees."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Employee has required fields', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.expect(body).to.have.property('firstName');",
+                  "    pm.expect(body).to.have.property('paternalLastName');",
+                  "    pm.expect(body).to.have.property('active');",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST create employees",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"firstName\": \"Jorge\",\n    \"middleName\": \"Luis\",\n    \"paternalLastName\": \"Martinez\",\n    \"maternalLastName\": \"Cruz\",\n    \"birthDate\": \"15-06-1990\",\n    \"gender\": \"MALE\",\n    \"position\": \"Software Engineer\"\n  },\n  {\n    \"firstName\": \"Maria\",\n    \"middleName\": \"Elena\",\n    \"paternalLastName\": \"Lopez\",\n    \"maternalLastName\": \"Torres\",\n    \"birthDate\": \"22-03-1995\",\n    \"gender\": \"FEMALE\",\n    \"position\": \"Product Manager\"\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}{{employees_path}}",
+              "host": ["{{base_url}}{{employees_path}}"]
+            },
+            "description": "Creates one or more employees in a single request.\n\n**Date format:** `dd-MM-yyyy`\n\n**Gender values:** `MALE`, `FEMALE`, `OTHER`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('array');",
+                  "    pm.expect(body.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test('Auto-fill employee_id from first result', function () {",
+                  "    const body = pm.response.json();",
+                  "    if (body.length > 0 && body[0].id) {",
+                  "        pm.environment.set('employee_id', body[0].id);",
+                  "        console.log('employee_id set to: ' + body[0].id);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT update employee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"position\": \"Senior Software Engineer\",\n  \"birthDate\": \"15-06-1990\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}{{employees_path}}/{{employee_id}}",
+              "host": ["{{base_url}}{{employees_path}}/{{employee_id}}"]
+            },
+            "description": "Updates all or some fields of an existing employee. Only the fields included in the body will be updated.\n\n**Updatable fields:** `position`, `birthDate`, `active`\n\n> **Note:** `employee_id` is auto-filled after running POST /employees."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Employee was updated', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.position).to.eql('Senior Software Engineer');",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE employee",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{employees_path}}/{{employee_id}}",
+              "host": ["{{base_url}}{{employees_path}}/{{employee_id}}"]
+            },
+            "description": "Deletes an employee by their UUID.\n\n> **Note:** `employee_id` is auto-filled after running POST /employees."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty', function () {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET search employees by name",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}{{employees_path}}/search?name=Jorge",
+              "host": ["{{base_url}}{{employees_path}}/search"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Jorge",
+                  "description": "Partial name to search (first name, middle name or last names)"
+                }
+              ]
+            },
+            "description": "Returns employees whose first or last name partially matches the search term."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Response time is less than 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "description": "Health check endpoints",
+      "item": [
+        {
+          "name": "GET health (all)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}/health"]
+            },
+            "description": "Returns the overall health status of the application (liveness + readiness)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Status is UP', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql('UP');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET health liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/live",
+              "host": ["{{base_url}}/health/live"]
+            },
+            "description": "Checks if the application is alive."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Liveness is UP', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql('UP');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET health readiness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/ready",
+              "host": ["{{base_url}}/health/ready"]
+            },
+            "description": "Checks if the application is ready to receive traffic (database connection)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Readiness is UP', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql('UP');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OpenAPI",
+      "description": "API documentation endpoints",
+      "item": [
+        {
+          "name": "GET OpenAPI spec (YAML)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/q/openapi",
+              "host": ["{{base_url}}/q/openapi"]
+            },
+            "description": "Returns the OpenAPI specification in YAML format."
+          },
+          "response": []
+        },
+        {
+          "name": "GET OpenAPI spec (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/q/openapi?format=json",
+              "host": ["{{base_url}}/q/openapi"],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            },
+            "description": "Returns the OpenAPI specification in JSON format."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+
